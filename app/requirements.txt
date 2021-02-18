@@ -1,0 +1,7 @@
+fastapi
+python-multipart
+vosk
+fleep
+attrs
+pydub
+aiofiles
