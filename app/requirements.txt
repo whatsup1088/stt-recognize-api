@@ -5,3 +5,6 @@ fleep
 attrs
 pydub
 aiofiles
+uvloop
+unicorn
+httptools
