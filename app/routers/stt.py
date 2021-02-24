@@ -15,7 +15,7 @@ router = APIRouter()
 
 @router.on_event("startup")
 async def starup_event():
-    router._model = Model("speech_model/esun")
+    router._model = Model("/home/jovyan/edu-stt-and-tts/vosk_model/esun")
 
 
 @router.post("/stt/recognize")

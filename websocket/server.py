@@ -10,7 +10,7 @@ from vosk import KaldiRecognizer, Model
 
 vosk_interface = "0.0.0.0"
 vosk_port = 2700
-vosk_model_path = "model/esun"
+vosk_model_path = "/home/jovyan/edu-stt-and-tts/vosk_model/esun"
 
 model = Model(vosk_model_path)
 pool = concurrent.futures.ThreadPoolExecutor((os.cpu_count() or 1))
