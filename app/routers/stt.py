@@ -3,11 +3,12 @@ from pathlib import Path
 from typing import List
 
 from fastapi import APIRouter, BackgroundTasks, File, UploadFile
-from libs.recognizer import Recognizer
 from misc import save_upload_file
 from models.Recognition import RecognitionModel
 from settings import File as file_setting
 from vosk import Model
+
+from libs.recognizer import Recognizer
 
 router = APIRouter()
 
@@ -45,7 +46,10 @@ async def create_upload_files(
             )
 
         rec = Recognizer(router._model)
-        sentences = rec.recognize(upload_file, media_type)
+
+        contents = rec.format_normalize(upload_file.file, media_type)
+        sentences = rec.recognize(contents)
+
         response[upload_file.filename] = RecognitionModel(
             data=dict(
                 uniqid=uniqid,
