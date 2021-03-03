@@ -24,7 +24,7 @@ def send_action(textbook, state):
     if state == -1:
         next_action = 'close'
     
-    if state == 0:
+    elif state == 0:
         if in_sentence(['信用卡', '卡', '卡片'], textbook):
             state = 1
             next_action = 'F01'
@@ -34,7 +34,7 @@ def send_action(textbook, state):
         else:
             next_action = 'retry'
 
-    if state == 1:
+    elif state == 1:
         if in_sentence(['帳單', '繳費'], textbook):
             state = 0
             next_action = 'A01'
@@ -53,7 +53,7 @@ def send_action(textbook, state):
         else:
             next_action = 'retry'
 
-    if state == 2:
+    elif state == 2:
         if in_sentence(['帳戶查詢', '傳真'], textbook):
             state = 0
             next_action = 'A06'
@@ -74,6 +74,9 @@ def send_action(textbook, state):
             next_action = 'A11'
         else:
             next_action = 'retry'
+    
+    else:
+        next_action = 'retry'
 
     save_to_redis(request_id, next_action)
 
