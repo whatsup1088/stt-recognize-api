@@ -56,7 +56,7 @@ def send_action(textbook, state):
     elif state == 2:
         if in_sentence(['帳戶查詢', '傳真'], textbook):
             state = 0
-            next_action = 'A06'
+            next_action = 'A06'
         elif in_sentence(['轉帳', '定存'], textbook):
             state = 0
             next_action = 'A07'
