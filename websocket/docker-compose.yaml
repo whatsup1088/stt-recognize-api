@@ -1,0 +1,11 @@
+version: "3.7"
+
+services:
+  websocket:
+    build: .
+    ports:
+      - "10000-10029:2702"
+    volumes:
+      - ./:/app
+      - /home/lala/disk-for-data:/app/data
+    scale: 5

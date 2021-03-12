@@ -13,7 +13,7 @@ from NLU import nlu
 
 vosk_interface = "0.0.0.0"
 vosk_port = 2702
-vosk_model_path = "../model"
+vosk_model_path = "data/model"
 
 model = Model(vosk_model_path)
 pool = concurrent.futures.ThreadPoolExecutor((os.cpu_count() or 1))
