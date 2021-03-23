@@ -1,0 +1,86 @@
+[parameters]
+retry_count = 2
+
+[end_point]
+ivr_111_1_2 = 查詢信用卡額度, credit_card, quota
+ivr_111_3_4_5 = 查詢信用卡帳單結帳日, credit_card, date
+ivr_111_6_7_8 = 查詢信用卡繳款方式, credit_card, pay, how
+ivr_113 = 查詢信用卡繳款金額與期限, credit_card, pay
+ivr_1121 = 查詢信用卡可用額度, credit_card, quota, remaining
+ivr_1122 = 調整信用卡額度, credit_card, quota, adjust
+ivr_118 = 補寄信用卡紙本帳單, credit_card, paper, transaction, send
+ivr_114 = 補寄信用卡電子帳單, credit_card, electric, transaction, send
+ivr_117 = 傳真信用卡帳單, credit_card, fax, transaction, send
+ivr_116 = 使用本行帳戶繳信用卡費, credit_card, esun, pay, transaction
+ivr_121 = 查詢信用卡申辦進度, credit_card, bid, state
+ivr_123 = 信用卡開卡, credit_card, open
+ivr_132 = 申請信用卡刷卡消費分期, credit_card, installment
+ivr_133 = 信用卡預借現金服務, credit_card, loan
+ivr_134 = 查詢信用卡預借現金額度, credit_card, loan, quota
+ivr_136 = 國旅卡檢核系統之帳號或密碼重新設定, credit_card, reset, info
+ivr_*32 = 信用卡道路救援, road_assist
+ivr_14 = 查詢信用卡優惠, credit_card, discount
+ivr_151 = 查詢機場接送優惠, airport, pickup, discount
+ivr_152 = 預約機場接送, airport, pickup
+ivr_211 = 查詢帳戶存款餘額, deposit, account
+ivr_212 = 查詢支票存款當日存待補票金額, check, money
+ivr_213 = 傳真支票存款對帳單及存款帳戶交易明細, fax, transaction, account
+ivr_221 = 轉帳至本行帳戶, transfer, esun
+ivr_222 = 跨行轉帳, transfer, other
+ivr_224 = 申請台幣定期存款, period
+ivr_235 = 語音密碼變更, reset, password
+ivr_242 = 查詢貸款繳款日期及金額, loan, pay
+ivr_31 = 數位服務, digital
+ivr_131 = 申請卡友貸, loan
+ivr_*31 = 轉接道路救援合作廠商, forward, road_assist
+ivr_153 = 轉接ego台灣租車預約機場接送, forward, airport, pickup
+ivr_42 = 轉接證券服務專人, stock
+ivr_218 = 轉接支存照會專人, notify
+ivr_241 = 轉接貸款申請專人, loan, forward
+ivr_*10 = 掛失信用卡, credit_card, loss
+ivr_*2 = 掛失金融卡, debit_card, loss
+ivr_10 = 轉接信用卡服務專人, credit_card
+ivr_20_1 = 轉接銀行服務專人, bank_business
+ivr_20_2 = 轉接銀行服務專人, debit_card
+
+
+[tag]
+money = 金額, 多少, 多少錢, 錢
+bank_business = 存款, 匯款, 外幣, 存匯, 外匯, 貸款, 基金
+notify = 照會, 支存照會
+stock = 證券, 玉證, 玉山證券, 股票
+forward = 轉接, 打電話, 電話, 轉, 專人, 真人, 專員, 服務人員, 找, 轉給, 轉到
+digital = 數位, 數位帳戶, 無卡, 無卡提款, 網路銀行, 網銀, 跨境e指購, 全球通, paypal
+password = 密碼, password
+period = 定存, 定期, 定期存款
+transfer = 轉帳, 轉錢
+deposit = 存款, 多少, 多少錢 
+account = 戶頭, 帳戶, 帳號
+discount = 紅利, 優惠, 停車, 貴賓室, 旅遊保險, 旅遊險
+road_assist = 道路救援, 道救, 行遍天下, 拖車, 拖吊, 沒電, 拋錨
+info = 帳號, 密碼
+reset = 重弄, 重設, 重新, 設定
+loan = 預借現金, 預借, 貸款, 信貸, 預支, 房貸, 卡友貸
+installment = 分期, 分期付款
+open = 開卡
+bid = 申辦, 辦卡, 申請
+state = 到哪, 狀態, 怎樣, 怎麼樣, 進度
+esun = 玉山, 本行, 玉山銀行
+other = 他行, 跨行, 
+fax = 傳真
+electric = mail, e-mail, 電子郵件, 簡訊
+send = 寄, 補寄, 傳, 傳送,  補
+adjust = 調整, 調額, 調
+remaining = 剩餘, 剩, 還有
+pay = 繳, 繳款, 付款, 繳錢, 交錢, 繳交, 費用, 自動扣繳, 扣繳, 多少
+web = 網路, 線上, 網頁
+how = 如何, 怎麼, 怎樣
+quota = 額度, 限額, 總額
+date = 日, 日期, 時候, 哪一天, 期限, 幾號
+credit_card = card, ubear, 信用卡, 信用卡處, 信用, credit, pi卡, 卡, 卡片, master, only, 宏匯卡, 醫師卡, 刷卡, 聯名卡, 國旅卡, 簽帳卡
+transaction = 交易, 帳單, 對帳單, 明細, 帳務, 出帳, 未出帳, 紀錄, 記錄, 帳戶, 買, 消費
+loss = 遺失, lost, loss, 掉了, 丟了, 不見, 不見了, 找不到, 掛失
+airport = 桃園國際機場, 桃園機場, 松山機場, 小港機場, 小港國際機場, 機場, 桃機, 松機
+pickup = 接送, 預約
+debit_card = 金融卡, 卡, 卡片, 刷卡, debit卡, debit, 簽帳卡
+
