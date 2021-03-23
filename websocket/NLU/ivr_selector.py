@@ -98,7 +98,7 @@ class Selector:
 
 
     def load_pkl(self):
-        self.data = pd.read_pickle(os.path.join(os.path.dirname(__file__), 'ivr_flatten_0315.pkl'))
+        self.data = pd.read_pickle(os.path.join(os.path.dirname(__file__), 'ivr_cust_q.pkl'))
         tmp = self.data[['cust_q', 'ivr_no']]
         tmp_list = tmp.values.tolist()
         return tmp_list
