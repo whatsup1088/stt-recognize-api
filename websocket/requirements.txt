@@ -1,3 +1,6 @@
 websockets
 vosk
 redis
+configobj
+jieba
+pandas

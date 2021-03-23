@@ -8,7 +8,7 @@ import copy
 import pandas as pd
 import jieba
 import os
-from if_stt.code.text_processing.tokenizer import Tokenizer
+# from if_stt.code.text_processing.tokenizer import Tokenizer
 # 先不斷詞，因為 stt 結果為已斷過詞
 # 實作算分的機制
 
@@ -23,8 +23,8 @@ class Selector:
 
     def eval_performance(self):
         # tok = Tokenizer('lm_config.ini')
-        jieba_main_dict_path = os.path.join('if_stt/source/basic_dict/jieba.5.txt')
-        jieba_user_dict_path = os.path.join('if_stt/source/basic_dict/__UserDict.txt')
+        jieba_main_dict_path = os.path.join(os.path.dirname(__file__), 'jieba.5.txt')
+        jieba_user_dict_path = os.path.join(os.path.dirname(__file__), '__UserDict.txt')
         jieba.set_dictionary(jieba_main_dict_path)
         jieba.load_userdict(jieba_user_dict_path)
 
@@ -87,18 +87,18 @@ class Selector:
         print(f'準確度：{len(right_list)/float(len(right_list) + len(wrong_list))} 問題、答對 {len(right_list)} 題、答錯 {len(wrong_list)} 題、需追問 {len(reask_list)} 題 (需追問的不列入準確度計算)')
         print(f'覆蓋率：{(len(right_list) + len(wrong_list) + len(reask_list))/float(len(test_ans_list))}，共 {len(test_ans_list)} 題，等於 (答對題數+答錯題數+追問題數)/總題數')
 
-        with open('right_list.txt', 'w') as f:
+        with open(os.path.join(os.path.dirname(__file__), 'right_list.txt'), 'w') as f:
             f.write('\n'.join(right_list))
-        with open('wrong_list.txt', 'w') as f:
+        with open(os.path.join(os.path.dirname(__file__), 'wrong_list.txt'), 'w') as f:
             f.write('\n'.join(wrong_list))
-        with open('reask_list.txt', 'w') as f:
+        with open(os.path.join(os.path.dirname(__file__), 'reask_list.txt'), 'w') as f:
             f.write('\n'.join(reask_list))
-        with open('legacy_ivr_list.txt', 'w') as f:
+        with open(os.path.join(os.path.dirname(__file__), 'legacy_ivr_list.txt'), 'w') as f:
             f.write('\n'.join(legacy_ivr_list))
 
 
     def load_pkl(self):
-        self.data = pd.read_pickle('ivr_flatten_0315.pkl')
+        self.data = pd.read_pickle(os.path.join(os.path.dirname(__file__), 'ivr_flatten_0315.pkl'))
         tmp = self.data[['cust_q', 'ivr_no']]
         tmp_list = tmp.values.tolist()
         return tmp_list
@@ -273,11 +273,12 @@ class Selector:
             
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("config_path", help="please input an abs path to your config file")
-    args = parser.parse_args()
-    print("Config 檔案路徑：", args.config_path)
-    slct = Selector(args.config_path)
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("config_path", help="please input an abs path to your config file")
+    # args = parser.parse_args()
+    # print("Config 檔案路徑：", args.config_path)
+    # slct = Selector(args.config_path)
+    slct = Selector(os.path.join(os.path.dirname(__file__), 'keyword_tag_prototype.txt'))
     exit()
 
     test_sentence = ['我 的 信用卡 丟了 怎麼辦', 
