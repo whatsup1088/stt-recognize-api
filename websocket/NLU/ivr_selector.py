@@ -64,11 +64,11 @@ class Selector:
                 if len(selector_ans_list[i]) > 1:
                     # 追問
                     log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
-                    legacy_ivr_list.append(','.join(log))
+                    reask_list.append(','.join(log))
                 elif selector_ans_list[i][0][0].split('_', -1)[1] == '-1':
                     # 傳統 ivr
                     log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
-                    reask_list.append(','.join(log))
+                    legacy_ivr_list.append(','.join(log))
                 elif test_ans_list[i] == selector_ans_list[i][0][0].split('_', -1)[1]:
                     # 答對
                     log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
