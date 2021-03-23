@@ -1,3 +1,6 @@
+# spaceman defines
+websocket/NLU/*list.txt
+websocket/NLU/*.pkl
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
