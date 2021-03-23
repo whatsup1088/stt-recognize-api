@@ -17,9 +17,6 @@ class Selector:
         self.cfg = ConfigObj(cfg_path)
         self.process_cfg()
         self.keyword_mapping_dict = self.build_keyword_count()
-        self.eval_performance()
-        # input()
-        # print(self.keyword_mapping_dict)
 
     def eval_performance(self):
         # tok = Tokenizer('lm_config.ini')
@@ -68,7 +65,7 @@ class Selector:
                     # 追問
                     log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
                     legacy_ivr_list.append(','.join(log))
-                elif selector_ans_list[i][0][0].split('_', -1)[1] == -1:
+                elif selector_ans_list[i][0][0].split('_', -1)[1] == '-1':
                     # 傳統 ivr
                     log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
                     reask_list.append(','.join(log))
@@ -87,13 +84,13 @@ class Selector:
         print(f'準確度：{len(right_list)/float(len(right_list) + len(wrong_list))} 問題、答對 {len(right_list)} 題、答錯 {len(wrong_list)} 題、需追問 {len(reask_list)} 題 (需追問的不列入準確度計算)')
         print(f'覆蓋率：{(len(right_list) + len(wrong_list) + len(reask_list))/float(len(test_ans_list))}，共 {len(test_ans_list)} 題，等於 (答對題數+答錯題數+追問題數)/總題數')
 
-        with open(os.path.join(os.path.dirname(__file__), 'right_list.txt'), 'w') as f:
+        with open(os.path.join(os.path.dirname(__file__), 'right_list.txt'), 'w', encoding='utf8') as f:
             f.write('\n'.join(right_list))
-        with open(os.path.join(os.path.dirname(__file__), 'wrong_list.txt'), 'w') as f:
+        with open(os.path.join(os.path.dirname(__file__), 'wrong_list.txt'), 'w', encoding='utf8') as f:
             f.write('\n'.join(wrong_list))
-        with open(os.path.join(os.path.dirname(__file__), 'reask_list.txt'), 'w') as f:
+        with open(os.path.join(os.path.dirname(__file__), 'reask_list.txt'), 'w', encoding='utf8') as f:
             f.write('\n'.join(reask_list))
-        with open(os.path.join(os.path.dirname(__file__), 'legacy_ivr_list.txt'), 'w') as f:
+        with open(os.path.join(os.path.dirname(__file__), 'legacy_ivr_list.txt'), 'w', encoding='utf8') as f:
             f.write('\n'.join(legacy_ivr_list))
 
 
@@ -213,8 +210,8 @@ class Selector:
                     # input('uuuuuu')
                 else:
                     final_res[k] = (v[-1]-v[0])/float(len(v))
-            print(final_res)
-            print(']]]]]]]]]]')
+            # print(final_res)
+            # print(']]]]]]]]]]')
             try:
                 res = [min(final_res.items(), key=lambda x:x[1])]
             except:
@@ -279,6 +276,7 @@ if __name__ == '__main__':
     # print("Config 檔案路徑：", args.config_path)
     # slct = Selector(args.config_path)
     slct = Selector(os.path.join(os.path.dirname(__file__), 'keyword_tag_prototype.txt'))
+    slct.eval_performance()
     exit()
 
     test_sentence = ['我 的 信用卡 丟了 怎麼辦', 
