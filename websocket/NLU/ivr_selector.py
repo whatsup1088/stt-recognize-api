@@ -235,17 +235,13 @@ class Selector:
         return res 
 
     def response_action(self, end_point_list):
-        end_point_content = self.end_point_content
         if len(end_point_list) > 1:
-            msg = f'iIVR：不好意思，請問要 {end_point_content[end_point_list[0][0]]} 還是 {end_point_content[end_point_list[1][0]]} 還是什麼服務呢？\n顧客：'
-            state = 'multiple'
+            msg = ','.join( 'F_{}'.format(ext[0].split('_')[-1]) for ext in end_point_list) 
         elif len(end_point_list) == 0:
-            msg = f'iIVR：抱歉，系統無法辨識您的需求，將用傳統 IVR 繼續為您服務'
-            state = 'unknown'
+            msg = 'F_-1'
         else:
-            msg = f'iIVR：立刻為您導航至 {end_point_content[end_point_list[0][0]]}'
-            state = 'complete'
-        return msg, state
+            msg = 'E_{}'.format(end_point_list[0][0].split('_')[-1]) 
+        return msg
 
     def run_keyword_main_procedure(self, max_re_ask_count: int = -1):
         if max_re_ask_count == -1:
