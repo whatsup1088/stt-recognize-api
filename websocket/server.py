@@ -2,14 +2,18 @@
 
 import asyncio
 import concurrent.futures
+from datetime import datetime
 import json
+import logging
 import os
+import time
 from urllib.parse import parse_qs, urlparse
 
-import websockets
+import redis
 from vosk import KaldiRecognizer, Model
+import websockets
 
-from NLU import nlu
+from NLU import ivr_selector
 
 vosk_interface = "0.0.0.0"
 vosk_port = 2702
@@ -18,6 +22,24 @@ vosk_model_path = "data/model"
 model = Model(vosk_model_path)
 pool = concurrent.futures.ThreadPoolExecutor((os.cpu_count() or 1))
 loop = asyncio.get_event_loop()
+
+slct = ivr_selector.Selector('./NLU/keyword_tag_prototype.txt')
+
+log_record = {}
+msg_time_list = []
+
+
+def save_to_redis(request_id, nlu_rslt):
+    r = redis.StrictRedis(host="192.168.8.166", port=6379, db=0, password='crv1313', decode_responses=True)
+    r.rpush(request_id, nlu_rslt)
+    r.expire(request_id, 2*3600)
+
+
+def set_log():
+    logging.basicConfig(filename='./log/stt_'+str(datetime.now().strftime('%Y%m%d'))+'.log',
+                        datefmt='%Y%m%d %H:%M:%S',
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        level=logging.DEBUG)
 
 
 def process_chunk(rec, message):
@@ -29,20 +51,20 @@ def process_chunk(rec, message):
 async def recognize(websocket, path):
 
     rec = None
-    phrase_list = None
     sample_rate = 8000
-    state = 0
 
     request_id = parse_qs(urlparse(path).query).get('unique_id', 'unknow')
 
     if isinstance(request_id, list):
         request_id = request_id[0]
-
+    
     print(f"request id: {request_id}")
+    log_record['unique_id'] = request_id
 
     while True:
 
         message = await websocket.recv()
+        msg_time_list.append(time.ctime())
 
         if isinstance(message, str):
             print(f"copy that: {message}")
@@ -51,14 +73,30 @@ async def recognize(websocket, path):
         if not rec:
             rec = KaldiRecognizer(model, sample_rate)
 
-        response = await loop.run_in_executor(pool, process_chunk, rec, message)
-        res = json.loads(response)
+        try:
+            response = await loop.run_in_executor(pool, process_chunk, rec, message)
+            res = json.loads(response)
+            if res.get("text", False):
+                log_record['recognize_end'] = time.ctime()
+                log_record['sentence_start'] = msg_time_list[0]
+                log_record['sentence_end'] = msg_time_list[-1]
+                log_record['sentence_time_diff'] = (datetime.strptime(log_record['sentence_end'], "%c") - 
+                                                    datetime.strptime(log_record['sentence_start'], "%c")).seconds
+                log_record['recognize_time_diff'] = (datetime.strptime(log_record['recognize_end'], "%c") - 
+                                                    datetime.strptime(log_record['sentence_end'], "%c")).seconds              
+                log_record['stt_result'] = res.get("text")
+                logging.info(log_record)
+                msg_time_list = []
+                
+                nlu_rslt = slct.run_selector(res.get("text"))
+                msg = slct.response_action(nlu_rslt)
+                # save_to_redis(request_id, msg)
+                print(f"{msg}, {response}")
 
-        if res.get("text", False):
-            state = nlu.send_action(res.get("text"), state, request_id)
-            print(f"{state}, {response}")
-
-        await websocket.send(response)
+            await websocket.send(response)
+        except Exception as e:
+            logging.error(e) 
+      
 
 start_server = websockets.serve(recognize, vosk_interface, vosk_port)
 
