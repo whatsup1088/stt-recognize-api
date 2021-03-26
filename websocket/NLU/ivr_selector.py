@@ -236,11 +236,11 @@ class Selector:
 
     def response_action(self, end_point_list):
         if len(end_point_list) > 1:
-            msg = ','.join( 'F_{}'.format(ext[0].split('_')[-1]) for ext in end_point_list) 
+            msg = ','.join( 'F_{}'.format(ext[0].replace('ivr_','')) for ext in end_point_list) 
         elif len(end_point_list) == 0:
             msg = 'F_-1'
         else:
-            msg = 'E_{}'.format(end_point_list[0][0].split('_')[-1]) 
+            msg = 'E_{}'.format(end_point_list[0][0].split('_')[1]) 
         return msg
 
     def run_keyword_main_procedure(self, max_re_ask_count: int = -1):
@@ -272,10 +272,11 @@ if __name__ == '__main__':
     # print("Config 檔案路徑：", args.config_path)
     # slct = Selector(args.config_path)
     slct = Selector(os.path.join(os.path.dirname(__file__), 'keyword_tag_prototype.txt'))
-    slct.eval_performance()
-    exit()
+    # slct.eval_performance()
+    # exit()
 
-    test_sentence = ['我 的 信用卡 丟了 怎麼辦', 
+    test_sentence = [  '我 的 丟了 怎麼辦',
+                       '我 的 信用卡 丟了 怎麼辦', 
     #                  '我 的 金融卡 掉了 怎麼辦', 
     #                  '我 卡片 丟了 怎麼辦', 
     #                  '我 的 卡 不見 了 怎麼辦', 
