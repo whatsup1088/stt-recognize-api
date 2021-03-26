@@ -127,7 +127,7 @@ class Selector:
             self.end_point_content[k] = v[0]
             # self.cfg['end_point'][k] = set(v[1:])
 
-    # 把關鍵字建分數字典，先 count 每個詞出現在
+    # 把關鍵字建分數字典，先 count 每個詞出現在幾個 end_point 裡面
     def build_keyword_count(self):
         tag_dict = self.cfg['tag']
         keyword_mapping_dict = dict()
@@ -143,27 +143,20 @@ class Selector:
 
     def match_end_point(self, sentence_tag_score: list):
         s_tag_score = sentence_tag_score
-        # print(s_tag_score)
         end_point_dict = self.end_point_map_tag
         res = dict()
         for k, v in end_point_dict.items():
             res[k] = 0
             for vv in v:
-                # print('vv', vv)
                 if vv in s_tag_score.keys():
                     res[k] += s_tag_score[vv]/len(end_point_dict[k])
-
-        # print(res)
-        # print('>>>>>')
         return res
 
     # 關鍵字對應到哪個 tag 的分數
     def get_all_tag_score_in_sentence(self, sentence: str):
         tag_score = dict()
         keyword_mapping_dict = self.keyword_mapping_dict
-        # print('0000000', sentence)
         for i in sentence.strip().split(' '):
-            # print(i, '......')
             if i in keyword_mapping_dict.keys():
                 for tag in keyword_mapping_dict[i][1]:
                     if tag not in tag_score.keys():
@@ -171,9 +164,6 @@ class Selector:
                     tmp = max([keyword_mapping_dict[i][0] for j in keyword_mapping_dict[i][1]])
                     if tmp > tag_score[tag]:
                         tag_score[tag] = tmp
-        # tmp = list()
-        # tmp.append(sentence)
-        # print(tag_score, ',,,,,,,,,')
         return tag_score
 
     def decide_which_end_point(self, end_point_dict: dict):
@@ -188,50 +178,56 @@ class Selector:
                 res.append(i)
         return res
 
-    def refine_decision(self, sentence, end_point_candidate):
-        res = copy.deepcopy(end_point_candidate)
-        final_res = dict()
-        # print(end_point_candidate)
-        # input()
-        dist_dict = dict()
+    def refine_decision(self, sentence: str, end_point_candidate: list):
+        # end_point 命名為 ivr_xxx_yyy
+        # 這裡得把 xxx 歸類到同一項，確認多個 xxx 是不同的才進行追問
+
+        # 完全沒有關鍵字的，就把 end_point 代號設為 -1
         if len(end_point_candidate) == 0:
             return [('ivr_-1', 1.0)]
+        # 表示答案唯一，直接回傳
+        elif len(end_point_candidate) == 1:
+            return end_point_candidate
+        # 到這裡表示 end_point_candidate 的內容有多個
+        # 檢查 xxx 是不是全部都同一個
+        candidate_set = set([i[0].split('_', -1)[1] for i in end_point_candidate])
+        if len(candidate_set) == 1:
+            return [(f'{list(candidate_set)[0]}', 1.0)]
+
+        # 多個 end_point 同時完全滿足的才進行檢查，沒滿的就去追問吧
+        if end_point_candidate[0][1] < 1:
+            return end_point_candidate
+
+        res = copy.deepcopy(end_point_candidate)
+        final_res = dict()
+        dist_dict = dict()
+
+        # 到這邊表示有多個 xxx 了
         for k in end_point_candidate:
             dist_dict[k[0]] = list()
         end_point_dict = self.end_point_map_tag
         keyword_score = self.keyword_mapping_dict
-        # print('~~~', res)
         # 只要處理複數個 1 的狀況就好
         if len(res) > 1 and res[0][1] == 1:
-        # if len(res) > 1:
             count = 0
             for i in sentence.strip().split(' '):
                 if i in keyword_score.keys() and len(keyword_score[i][1]) == 1:
                     for j in dist_dict.keys():
-                        # print(end_point_dict[j])
-                        # print(keyword_score[i])
-                        # input('[[[[[[[')
                         if len(keyword_score[i][1].intersection(end_point_dict[j])) > 0:
                             dist_dict[j].append(count)
                     # 計算 tag 間的平均距離
                 count += 1
             for k, v in dist_dict.items():
                 if len(v) == 1:
-                    # print(f'有問題: {k} {v}\n{sentence}\n{end_point_candidate}')
                     final_res[k] = len(end_point_dict[k])
-                    # print(final_res[k])
-                    # input('uuuuuu')
                 else:
                     final_res[k] = (v[-1]-v[0])/float(len(v))
-            # print(final_res)
-            # print(']]]]]]]]]]')
             try:
                 res = [min(final_res.items(), key=lambda x:x[1])]
             except:
                 print(dist_dict)
                 print(sentence, end_point_candidate)
                 input(',,,,')
-            # print(res, '.....')
         return res
 
     def run_selector(self, sentence: str, meta: dict={}, display: bool=True):
@@ -262,10 +258,36 @@ class Selector:
             
 
     def response_action(self, end_point_list):
+        end_point_content = self.end_point_content
+        if 'reask_content_max_count' in self.cfg.keys():
+            reask_content_max_count = self.cfg['reask_content_max_count']
+        else:
+            reask_content_max_count = 2
+        # 這裡要處理 end_point_list 是類似 [(ivr_111_1, 0.8), (ivr_111_2, 0.8), (ivr_118, 0.8)] 的情況
+        # 原則上 111 挑一個講就好，另外一個要講 118 的服務內容
         if len(end_point_list) > 1:
-            msg = ','.join( 'F_{}'.format(ext[0].replace('ivr_','')) for ext in end_point_list) 
-        elif len(end_point_list) == 0:
-            msg = 'F_-1'
+            ivr_code_set = set()
+            reask_item = list()
+            for i in end_point_list:
+                if len(reask_item) >= reask_content_max_count:
+                    break
+                ivr_code = i[0].split('_', -1)[1]
+                if ivr_code in ivr_code_set:
+                    continue
+                else:
+                    ivr_code_set.add(ivr_code)
+                    reask_item.append(i[0])
+            msg = f'iIVR：不好意思，請問要 '
+            for i in list(reask_item):
+                new_msg = f'{end_point_content[i]} 還是要 '
+                # msg = f'iIVR：不好意思，請問要 {end_point_content[end_point_list[0][0]]} 還是 {end_point_content[end_point_list[1][0]]} 還是什麼服務呢？\n顧客：'
+                msg = ''.join([msg, new_msg])
+            msg = ''.join([msg, '其他服務呢？\n顧客：'])
+            state = 'multiple'
+        # elif len(end_point_list) == 0:
+        elif end_point_list[0][0] == 'ivr_-1':
+            msg = f'iIVR：抱歉，系統無法辨識您的需求，將用傳統 IVR 繼續為您服務'
+            state = 'unknown'
         else:
             msg = 'E_{}'.format(end_point_list[0][0].split('_')[1]) 
         return msg
@@ -299,11 +321,15 @@ if __name__ == '__main__':
     # print("Config 檔案路徑：", args.config_path)
     # slct = Selector(args.config_path)
     slct = Selector(os.path.join(os.path.dirname(__file__), 'keyword_tag_prototype.txt'))
+    '''
+    完整測試模式
+    '''
     # slct.eval_performance()
-    # exit()
-
-    test_sentence = [  '我 的 丟了 怎麼辦',
-                       '我 的 信用卡 丟了 怎麼辦', 
+    
+    '''
+    小資料測試模式
+    '''
+    # test_sentence = ['我 的 信用卡 丟了 怎麼辦', 
     #                  '我 的 金融卡 掉了 怎麼辦', 
     #                  '我 卡片 丟了 怎麼辦', 
     #                  '我 的 卡 不見 了 怎麼辦', 
@@ -313,11 +339,15 @@ if __name__ == '__main__':
     #                  '我 昨天 買 衣服 刷卡 完 之後 黑 那個 我 回家 就 找不到 了',
     #                  '你 有 名字 嗎',
     #                  '我 可以 跟 你 約會 嗎', 
-                     '想 請問 信用 額度']
-    for i in test_sentence:
-        print('顧客：', i)
-        res = slct.run_selector(i)
-        msg = slct.response_action(res)
-        print('iIVR：', msg)
-    # while True:
-    #     slct.run_keyword_main_procedure()
+    #                  '想 請問 信用 額度']
+    # for i in test_sentence:
+    #     print('顧客：', i)
+    #     res = slct.run_selector(i)
+    #     msg = slct.response_action(res)
+    #     print('iIVR：', msg)
+
+    '''
+    無限問答模式
+    '''
+    while True:
+        slct.run_keyword_main_procedure()
