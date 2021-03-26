@@ -25,9 +25,6 @@ loop = asyncio.get_event_loop()
 
 slct = ivr_selector.Selector('./NLU/keyword_tag_prototype.txt')
 
-log_record = {}
-msg_time_list = []
-
 
 def save_to_redis(request_id, nlu_rslt):
     r = redis.StrictRedis(host="192.168.8.166", port=6379, db=0, password='crv1313', decode_responses=True)
@@ -39,7 +36,7 @@ def set_log():
     logging.basicConfig(filename='./log/stt_'+str(datetime.now().strftime('%Y%m%d'))+'.log',
                         datefmt='%Y%m%d %H:%M:%S',
                         format='%(asctime)s %(levelname)-8s %(message)s',
-                        level=logging.DEBUG)
+                        level=logging.INFO)
 
 
 def process_chunk(rec, message):
@@ -50,8 +47,11 @@ def process_chunk(rec, message):
 
 async def recognize(websocket, path):
 
+    msg_time_list = []
+    log_record = {}
+
     rec = None
-    sample_rate = 8000
+    sample_rate = 16000
 
     request_id = parse_qs(urlparse(path).query).get('unique_id', 'unknow')
 
@@ -65,7 +65,6 @@ async def recognize(websocket, path):
         try:
             message = await websocket.recv()
             msg_time_list.append(time.ctime())
-
             if isinstance(message, str):
                 print(f"copy that: {message}")
                 continue
@@ -75,6 +74,7 @@ async def recognize(websocket, path):
 
             response = await loop.run_in_executor(pool, process_chunk, rec, message)
             res = json.loads(response)
+            
             if res.get("text", False):
                 log_record['recognize_end'] = time.ctime()
                 log_record['sentence_start'] = msg_time_list[0]
@@ -95,9 +95,10 @@ async def recognize(websocket, path):
             await websocket.send(response)
         except Exception as e:
             logging.error(e) 
-      
 
-start_server = websockets.serve(recognize, vosk_interface, vosk_port)
+if __name__=='__main__':      
+    set_log()
+    start_server = websockets.serve(recognize, vosk_interface, vosk_port)
 
-loop.run_until_complete(start_server)
-loop.run_forever()
+    loop.run_until_complete(start_server)
+    loop.run_forever()
