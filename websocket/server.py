@@ -87,7 +87,8 @@ async def recognize(websocket, path):
                 logging.info(log_record)
                 msg_time_list = []
                 
-                nlu_rslt = slct.run_selector(res.get("text"))
+                meta = {'unique_id':request_id, 'voice_id':''}
+                nlu_rslt = slct.run_selector(res.get("text"), meta)
                 msg = slct.response_action(nlu_rslt)
                 # save_to_redis(request_id, msg)
                 print(f"{msg}, {response}")

@@ -1,16 +1,29 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-from configobj import ConfigObj
 import argparse
-import operator
 import copy
-import pandas as pd
-import jieba
+from datetime import datetime
+import logging
+import operator
 import os
+import time
+
+from configobj import ConfigObj
+import jieba
+import pandas as pd
+
 # from if_stt.code.text_processing.tokenizer import Tokenizer
 # 先不斷詞，因為 stt 結果為已斷過詞
 # 實作算分的機制
+
+logging.basicConfig(filename='./log/nlu_'+str(datetime.now().strftime('%Y%m%d'))+'.log',
+                    datefmt='%Y%m%d %H:%M:%S',
+                    format='%(asctime)s %(levelname)-8s %(message)s',
+                    level=logging.INFO)
+
+log_record = {}
+
 
 class Selector:
     def __init__(self, cfg_path: str):
@@ -221,18 +234,32 @@ class Selector:
             # print(res, '.....')
         return res
 
-    def run_selector(self, sentence: str, display: bool=True):
-        s_tag = self.get_all_tag_score_in_sentence(sentence)
-        self.tag_score = s_tag
-        sorted_end_point_dict = self.match_end_point(s_tag)
-        end_point_candidate = self.decide_which_end_point(sorted_end_point_dict)
-        res = self.refine_decision(sentence, end_point_candidate)
-        if display:
-            # print(s_tag)
-            # print(sorted_end_point_dict)
-            # print(end_point_candidate)
-            print(res)
-        return res 
+    def run_selector(self, sentence: str, meta: dict={}, display: bool=True):
+        try:
+            log_record['nlu_start'] = time.ctime()
+            s_tag = self.get_all_tag_score_in_sentence(sentence)
+            self.tag_score = s_tag
+            sorted_end_point_dict = self.match_end_point(s_tag)
+            end_point_candidate = self.decide_which_end_point(sorted_end_point_dict)
+            res = self.refine_decision(sentence, end_point_candidate)
+            log_record['nlu_end'] = time.ctime()
+            log_record['nlu_result'] = res
+            log_record['nlu_time_diff'] = (datetime.strptime(log_record['nlu_end'], "%c") - 
+                                           datetime.strptime(log_record['nlu_start'], "%c")).seconds 
+
+            if display:
+                # print(s_tag)
+                # print(sorted_end_point_dict)
+                # print(end_point_candidate)
+                print('res:', res)
+            return res
+        except Exception as e:
+            logging.error(e) 
+        finally:
+            log_record['unique_id'] = meta.get('unique_id', 'unknow')
+            log_record['voice_id'] = meta.get('voice_id', 'unknow')
+            logging.info(log_record)  
+            
 
     def response_action(self, end_point_list):
         if len(end_point_list) > 1:
