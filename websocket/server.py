@@ -62,18 +62,17 @@ async def recognize(websocket, path):
     log_record['unique_id'] = request_id
 
     while True:
-
-        message = await websocket.recv()
-        msg_time_list.append(time.ctime())
-
-        if isinstance(message, str):
-            print(f"copy that: {message}")
-            continue
-
-        if not rec:
-            rec = KaldiRecognizer(model, sample_rate)
-
         try:
+            message = await websocket.recv()
+            msg_time_list.append(time.ctime())
+
+            if isinstance(message, str):
+                print(f"copy that: {message}")
+                continue
+
+            if not rec:
+                rec = KaldiRecognizer(model, sample_rate)
+
             response = await loop.run_in_executor(pool, process_chunk, rec, message)
             res = json.loads(response)
             if res.get("text", False):
