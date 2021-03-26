@@ -262,9 +262,8 @@ class Selector:
             msg = f'iIVR：抱歉，系統無法辨識您的需求，將用傳統 IVR 繼續為您服務'
             state = 'unknown'
         else:
-            msg = f'iIVR：立刻為您導航至 {end_point_content[end_point_list[0][0]]}'
-            state = 'complete'
-        return msg, state
+            msg = 'E_{}'.format(end_point_list[0][0].split('_')[1]) 
+        return msg
 
     def run_keyword_main_procedure(self, max_re_ask_count: int = -1):
         if max_re_ask_count == -1:
