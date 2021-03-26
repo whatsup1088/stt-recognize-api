@@ -277,20 +277,24 @@ class Selector:
                 else:
                     ivr_code_set.add(ivr_code)
                     reask_item.append(i[0])
-            msg = f'iIVR：不好意思，請問要 '
+            msg_to_user = f'iIVR：不好意思，請問要 '
             for i in list(reask_item):
                 new_msg = f'{end_point_content[i]} 還是要 '
                 # msg = f'iIVR：不好意思，請問要 {end_point_content[end_point_list[0][0]]} 還是 {end_point_content[end_point_list[1][0]]} 還是什麼服務呢？\n顧客：'
-                msg = ''.join([msg, new_msg])
-            msg = ''.join([msg, '其他服務呢？\n顧客：'])
+                msg_to_user = ''.join([msg_to_user, new_msg])
+            msg_to_user = ''.join([msg_to_user, '其他服務呢？\n顧客：'])
             state = 'multiple'
+            msg_to_redis = ','.join( 'F_{}'.format(ext[0].split('_', -1)[1]) for ext in end_point_list)
         # elif len(end_point_list) == 0:
         elif end_point_list[0][0] == 'ivr_-1':
-            msg = f'iIVR：抱歉，系統無法辨識您的需求，將用傳統 IVR 繼續為您服務'
+            msg_to_user = f'iIVR：抱歉，系統無法辨識您的需求，將用傳統 IVR 繼續為您服務'
+            msg_to_redis = f'F_-1'
             state = 'unknown'
         else:
-            msg = 'E_{}'.format(end_point_list[0][0].split('_')[1]) 
-        return msg
+            msg_to_user = f'立刻為您導航至 {end_point_content[end_point_list[0][0]]}'
+            msg_to_redis = 'E_{}'.format(end_point_list[0][0].split('_')[1])
+            state = 'complete'
+        return msg_to_user, state, msg_to_redis
 
     def run_keyword_main_procedure(self, max_re_ask_count: int = -1):
         if max_re_ask_count == -1:
@@ -302,7 +306,7 @@ class Selector:
             if count > max_re_ask_count:
                 print('iIVR：抱歉，系統仍無法確認您的需求，將為您轉接專人，請稍候')
             res = self.run_selector(sentence)
-            msg, state = slct.response_action(res)
+            msg, state, msg_to_redis = slct.response_action(res)
             if state == 'complete':
                 print(msg)
                 break
