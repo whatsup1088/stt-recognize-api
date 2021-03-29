@@ -236,16 +236,19 @@ class Selector:
 
     def run_selector(self, sentence: str, meta: dict={}, display: bool=True):
         try:
-            log_record['nlu_start'] = time.ctime()
+            nlu_start_time = time.time()
+            log_record['nlu_start'] = time.ctime(nlu_start_time)
+
             s_tag = self.get_all_tag_score_in_sentence(sentence)
             self.tag_score = s_tag
             sorted_end_point_dict = self.match_end_point(s_tag)
             end_point_candidate = self.decide_which_end_point(sorted_end_point_dict)
             res = self.refine_decision(sentence, end_point_candidate)
-            log_record['nlu_end'] = time.ctime()
+
+            nlu_end_time = time.time()
+            log_record['nlu_end'] = time.ctime(nlu_end_time)
             log_record['nlu_result'] = res
-            log_record['nlu_time_diff'] = (datetime.strptime(log_record['nlu_end'], "%c") - 
-                                           datetime.strptime(log_record['nlu_start'], "%c")).seconds 
+            log_record['nlu_time_duration'] = nlu_end_time - nlu_start_time
 
             if display:
                 # print(s_tag)

@@ -64,7 +64,7 @@ async def recognize(websocket, path):
     while True:
         try:
             message = await websocket.recv()
-            msg_time_list.append(time.ctime())
+            msg_time_list.append(time.time())
             if isinstance(message, str):
                 print(f"copy that: {message}")
                 continue
@@ -76,13 +76,12 @@ async def recognize(websocket, path):
             res = json.loads(response)
             
             if res.get("text", False):
-                log_record['recognize_end'] = time.ctime()
-                log_record['sentence_start'] = msg_time_list[0]
-                log_record['sentence_end'] = msg_time_list[-1]
-                log_record['sentence_time_diff'] = (datetime.strptime(log_record['sentence_end'], "%c") - 
-                                                    datetime.strptime(log_record['sentence_start'], "%c")).seconds
-                log_record['recognize_time_diff'] = (datetime.strptime(log_record['recognize_end'], "%c") - 
-                                                    datetime.strptime(log_record['sentence_end'], "%c")).seconds              
+                recognize_end_time = time.time()
+                log_record['recognize_end'] = time.ctime(recognize_end_time)
+                log_record['sentence_start'] = time.ctime(msg_time_list[0])
+                log_record['sentence_end'] = time.ctime(msg_time_list[-1])
+                log_record['sentence_time_duration'] = msg_time_list[-1] - msg_time_list[0]
+                log_record['recognize_time_duration'] = recognize_end_time - msg_time_list[-1]         
                 log_record['stt_result'] = res.get("text")
                 logging.info(log_record)
                 msg_time_list = []
