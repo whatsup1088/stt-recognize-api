@@ -64,7 +64,7 @@ class Selector:
             except:
                 print('====', i)
                 input('????')
-            res = self.run_selector(' '.join(ii), display=False)
+            res = self.run_selector(' '.join(ii), display=True)
             selector_ans_list.append(res)
         
         # 比較結果，記錄結果
@@ -92,7 +92,9 @@ class Selector:
                     log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
                     wrong_list.append(','.join(log))
             except:
-                print(selector_ans_list[i])
+                print(f'{i}, {test_ans_list[i]} {test_q_list[i]} {tok_record[i]}')
+                print('----------', selector_ans_list[i])
+                input('>>>>>')
             # 比較是否包含在最高分項
         # 統計 True False
         print(f'準確度：{len(right_list)/float(len(right_list) + len(wrong_list))} 問題、答對 {len(right_list)} 題、答錯 {len(wrong_list)} 題、需追問 {len(reask_list)} 題 (需追問的不列入準確度計算)')
@@ -192,8 +194,9 @@ class Selector:
         # 到這裡表示 end_point_candidate 的內容有多個
         # 檢查 xxx 是不是全部都同一個
 
-        
+        # print(end_point_candidate, 'ttttt')
         candidate_set = set([i[0].split('_', -1)[1] for i in end_point_candidate])
+        # print(candidate_set, 'ttttt')
         # candidate_list = [i[0].split('_', -1)[1] for i in end_point_candidate]
         # counter = Counter(candidate_list)
         # counter_res = sorted(counter.items(), key=lambda item: item[1], reverse=True)
@@ -203,7 +206,7 @@ class Selector:
 
         # if len(counter) == 1:
         if len(candidate_set) == 1:
-            return [(f'ivr_{candidate_set[0]}', 1.0)]
+            return [(f'ivr_{list(candidate_set)[0]}', 1.0)]
         
         # elif counter_res[0][1] > counter_res[1][1]:
         #     return [(f'ivr_{counter_res[0][0]}', 1.0)] 
@@ -226,7 +229,7 @@ class Selector:
             # tag 多的 end_point 優先
             tag_count_list = sorted([(i, len(self.end_point_map_tag[i[0]])) for i in end_point_candidate], key=lambda item: item[1], reverse=True)
             if tag_count_list[0][1] > tag_count_list[1][1]:
-                print([tag_count_list[0][0]], '......')
+                # print([tag_count_list[0][0]], '......')
                 return [tag_count_list[0][0]]
             count = 0
             for i in sentence.strip().split(' '):
