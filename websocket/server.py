@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import time
+from threading import Thread
 from urllib.parse import parse_qs, urlparse
 import uuid
 
@@ -20,6 +21,9 @@ vosk_interface = "0.0.0.0"
 vosk_port = 2702
 vosk_model_path = "data/model"
 
+redis_conn = redis.StrictRedis(host="192.168.8.166", port=6379, db=0, password='crv1313', 
+                               decode_responses=True)
+
 model = Model(vosk_model_path)
 pool = concurrent.futures.ThreadPoolExecutor((os.cpu_count() or 1))
 loop = asyncio.get_event_loop()
@@ -27,10 +31,15 @@ loop = asyncio.get_event_loop()
 slct = ivr_selector.Selector('./NLU/keyword_tag_prototype.txt')
 
 
-def save_to_redis(request_id, nlu_rslt):
-    r = redis.StrictRedis(host="192.168.8.166", port=6379, db=0, password='crv1313', decode_responses=True)
-    r.rpush(request_id, nlu_rslt)
+def save_to_redis(r, request_id, nlu_rslt):
+    r.publish(request_id, nlu_rslt)
     r.expire(request_id, 2*3600)
+
+
+def send_hc_to_redis(r, port):
+    while 1:
+        r.publish(port, 'alive')
+        time.sleep(0.2)
 
 
 def set_log():
@@ -45,6 +54,7 @@ def process_chunk(rec, message):
         return rec.Result()
 
     return rec.PartialResult()
+
 
 async def recognize(websocket, path):
 
@@ -92,7 +102,8 @@ async def recognize(websocket, path):
                 meta = {'unique_id':request_id, 'voice_id':''}
                 nlu_rslt = slct.run_selector(res.get("text"), meta)
                 msg = slct.response_action(nlu_rslt)
-                # save_to_redis(request_id, msg)
+
+                save_to_redis(redis_conn, request_id, msg)
                 print(f"{msg}, {response}")
 
             await websocket.send(response)
@@ -101,6 +112,12 @@ async def recognize(websocket, path):
 
 if __name__=='__main__':      
     set_log()
+    
+    # health check
+    t = Thread(target=send_hc_to_redis, args=(redis_conn,vosk_port,))
+    t.start()
+
+    # start server
     start_server = websockets.serve(recognize, vosk_interface, vosk_port)
 
     loop.run_until_complete(start_server)
