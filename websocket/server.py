@@ -8,6 +8,7 @@ import logging
 import os
 import time
 from urllib.parse import parse_qs, urlparse
+import uuid
 
 import redis
 from vosk import KaldiRecognizer, Model
@@ -83,6 +84,8 @@ async def recognize(websocket, path):
                 log_record['sentence_time_duration'] = msg_time_list[-1] - msg_time_list[0]
                 log_record['recognize_time_duration'] = recognize_end_time - msg_time_list[-1]         
                 log_record['stt_result'] = res.get("text")
+                log_record['audio_file_id'] = '{}_{}_{}'.format(time.strftime("%Y-%m-%d", time.gmtime()), 
+                                                                request_id, str(uuid.uuid1()))
                 logging.info(log_record)
                 msg_time_list = []
                 
