@@ -8,6 +8,7 @@ import logging
 import operator
 import os
 import time
+from collections import Counter
 
 from configobj import ConfigObj
 import jieba
@@ -63,7 +64,7 @@ class Selector:
             except:
                 print('====', i)
                 input('????')
-            res = self.run_selector(' '.join(ii), display=True)
+            res = self.run_selector(' '.join(ii), display=False)
             selector_ans_list.append(res)
         
         # 比較結果，記錄結果
@@ -190,9 +191,22 @@ class Selector:
             return end_point_candidate
         # 到這裡表示 end_point_candidate 的內容有多個
         # 檢查 xxx 是不是全部都同一個
+
+        
         candidate_set = set([i[0].split('_', -1)[1] for i in end_point_candidate])
+        # candidate_list = [i[0].split('_', -1)[1] for i in end_point_candidate]
+        # counter = Counter(candidate_list)
+        # counter_res = sorted(counter.items(), key=lambda item: item[1], reverse=True)
+        # print(counter)
+        # print(counter_res)
+        # input()
+
+        # if len(counter) == 1:
         if len(candidate_set) == 1:
-            return [(f'{list(candidate_set)[0]}', 1.0)]
+            return [(f'ivr_{candidate_set[0]}', 1.0)]
+        
+        # elif counter_res[0][1] > counter_res[1][1]:
+        #     return [(f'ivr_{counter_res[0][0]}', 1.0)] 
 
         # 多個 end_point 同時完全滿足的才進行檢查，沒滿的就去追問吧
         if end_point_candidate[0][1] < 1:
@@ -208,7 +222,12 @@ class Selector:
         end_point_dict = self.end_point_map_tag
         keyword_score = self.keyword_mapping_dict
         # 只要處理複數個 1 的狀況就好
-        if len(res) > 1 and res[0][1] == 1:
+        if len(res) > 1 and res[0][1] >= 1:
+            # tag 多的 end_point 優先
+            tag_count_list = sorted([(i, len(self.end_point_map_tag[i[0]])) for i in end_point_candidate], key=lambda item: item[1], reverse=True)
+            if tag_count_list[0][1] > tag_count_list[1][1]:
+                print([tag_count_list[0][0]], '......')
+                return [tag_count_list[0][0]]
             count = 0
             for i in sentence.strip().split(' '):
                 if i in keyword_score.keys() and len(keyword_score[i][1]) == 1:
@@ -244,9 +263,10 @@ class Selector:
                                            datetime.strptime(log_record['nlu_start'], "%c")).seconds 
 
             if display:
-                # print(s_tag)
-                # print(sorted_end_point_dict)
-                # print(end_point_candidate)
+                print('||||||| debug ||||||||')
+                print(s_tag)
+                print(sorted_end_point_dict)
+                print(end_point_candidate)
                 print('res:', res)
             return res
         except Exception as e:
@@ -291,7 +311,10 @@ class Selector:
             msg_to_redis = f'F_-1'
             state = 'unknown'
         else:
-            msg_to_user = f'立刻為您導航至 {end_point_content[end_point_list[0][0]]}'
+            if end_point_list[0][0] in end_point_content.keys():
+                msg_to_user = f'立刻為您導航至 {end_point_content[end_point_list[0][0]]}'
+            else:
+                msg_to_user = f'立刻為您導航至 {end_point_list[0][0]} (滿足多重子項目)'
             msg_to_redis = 'E_{}'.format(end_point_list[0][0].split('_')[1])
             state = 'complete'
         return msg_to_user, state, msg_to_redis
@@ -324,11 +347,11 @@ if __name__ == '__main__':
     # args = parser.parse_args()
     # print("Config 檔案路徑：", args.config_path)
     # slct = Selector(args.config_path)
-    slct = Selector(os.path.join(os.path.dirname(__file__), 'keyword_tag_prototype.txt'))
+    slct = Selector(os.path.join(os.path.dirname(__file__), 'keyword_tag_v2.txt'))
     '''
     完整測試模式
     '''
-    # slct.eval_performance()
+    slct.eval_performance()
     
     '''
     小資料測試模式
@@ -353,5 +376,5 @@ if __name__ == '__main__':
     '''
     無限問答模式
     '''
-    while True:
-        slct.run_keyword_main_procedure()
+    # while True:
+    #     slct.run_keyword_main_procedure()
