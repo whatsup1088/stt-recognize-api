@@ -81,33 +81,42 @@ class Selector:
             elif len(selector_ans_list[i]) > 1:
                 # 追問
                 log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
-                reask_list.append(','.join(log))
+                reask_list.append(log)
             elif selector_ans_list[i][0][0].split('_', -1)[1] == '-1':
                 # 傳統 ivr
                 log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
-                legacy_ivr_list.append(','.join(log))
+                legacy_ivr_list.append(log)
             elif test_ans_list[i] == selector_ans_list[i][0][0].split('_', -1)[1]:
                 # 答對
                 log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
-                right_list.append(','.join(log))
+                right_list.append(log)
             else:
                 # 答錯
                 log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
-                wrong_list.append(','.join(log))
+                wrong_list.append(log)
             # 比較是否包含在最高分項
         # 統計 True False
         print(f'準確度：{len(right_list)/float(len(right_list) + len(wrong_list))} 問題、答對 {len(right_list)} 題、答錯 {len(wrong_list)} 題、需追問 {len(reask_list)} 題 (需追問的不列入準確度計算)')
         print(f'覆蓋率：{(len(right_list) + len(wrong_list) + len(reask_list))/float(len(test_ans_list))} = {(len(right_list) + len(wrong_list) + len(reask_list))}/{len(test_ans_list)} = (答對題數+答錯題數+追問題數)/總題數')
 
         with open(os.path.join(os.path.dirname(__file__), 'right_list.txt'), 'w', encoding='utf8') as f:
-            f.write('\n'.join(right_list))
+            f.write('\n'.join([','.join(i) for i in right_list]))
         with open(os.path.join(os.path.dirname(__file__), 'wrong_list.txt'), 'w', encoding='utf8') as f:
-            f.write('\n'.join(wrong_list))
+            f.write('\n'.join([','.join(i) for i in wrong_list]))
         with open(os.path.join(os.path.dirname(__file__), 'reask_list.txt'), 'w', encoding='utf8') as f:
-            f.write('\n'.join(reask_list))
+            f.write('\n'.join([','.join(i) for i in reask_list]))
         with open(os.path.join(os.path.dirname(__file__), 'legacy_ivr_list.txt'), 'w', encoding='utf8') as f:
-            f.write('\n'.join(legacy_ivr_list))
+            f.write('\n'.join([','.join(i) for i in legacy_ivr_list]))
 
+        self.make_confusion_matrix(right_list, wrong_list, reask_list, legacy_ivr_list)
+
+    def make_confusion_matrix(self, right_list: list, wrong_list: list, reask_list: list, legacy_ivr_list: list):
+        # 這邊實作更詳細的 report，分析 wrong_list，先統計各 ivr 分錯的，這邊交給思婕完成
+        # to-do 畫出 confusion matrix
+        # 每個 list 裡面的元素長這樣 ['消費 限額', '111', "[('ivr_1121_5', 0.6666666666666666)]"]
+        # 基本上就是 log 內容
+        # 輸出成圖檔就好？
+        pass
 
     def load_pkl(self):
         self.data = pd.read_pickle(os.path.join(os.path.dirname(__file__), 'ivr_cust_q.pkl'))
@@ -390,11 +399,11 @@ if __name__ == '__main__':
     '''
     無限問答模式
     '''
-    while True:
-        slct.run_keyword_main_procedure()
+    # while True:
+    #     slct.run_keyword_main_procedure()
 
     '''
     完整測試模式
     '''
-    # slct.eval_performance()
+    slct.eval_performance()
     
