@@ -64,7 +64,7 @@ class Selector:
             except:
                 print('====', i)
                 input('????')
-            res = self.run_selector(' '.join(ii), display=True)
+            res = self.run_selector(' '.join(ii), display=False)
             selector_ans_list.append(res)
         
         # 比較結果，記錄結果
@@ -74,31 +74,30 @@ class Selector:
         legacy_ivr_list = list()
 
         for i in range(len(test_ans_list)):
-            try:
-                if len(selector_ans_list[i]) > 1:
-                    # 追問
-                    log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
-                    reask_list.append(','.join(log))
-                elif selector_ans_list[i][0][0].split('_', -1)[1] == '-1':
-                    # 傳統 ivr
-                    log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
-                    legacy_ivr_list.append(','.join(log))
-                elif test_ans_list[i] == selector_ans_list[i][0][0].split('_', -1)[1]:
-                    # 答對
-                    log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
-                    right_list.append(','.join(log))
-                else:
-                    # 答錯
-                    log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
-                    wrong_list.append(','.join(log))
-            except:
+            if not isinstance(selector_ans_list[i], list):
                 print(f'{i}, {test_ans_list[i]} {test_q_list[i]} {tok_record[i]}')
                 print('----------', selector_ans_list[i])
                 input('>>>>>')
+            elif len(selector_ans_list[i]) > 1:
+                # 追問
+                log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
+                reask_list.append(','.join(log))
+            elif selector_ans_list[i][0][0].split('_', -1)[1] == '-1':
+                # 傳統 ivr
+                log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
+                legacy_ivr_list.append(','.join(log))
+            elif test_ans_list[i] == selector_ans_list[i][0][0].split('_', -1)[1]:
+                # 答對
+                log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
+                right_list.append(','.join(log))
+            else:
+                # 答錯
+                log = [' '.join(tok_record[i]), f'{test_ans_list[i]}', f'{selector_ans_list[i]}']
+                wrong_list.append(','.join(log))
             # 比較是否包含在最高分項
         # 統計 True False
         print(f'準確度：{len(right_list)/float(len(right_list) + len(wrong_list))} 問題、答對 {len(right_list)} 題、答錯 {len(wrong_list)} 題、需追問 {len(reask_list)} 題 (需追問的不列入準確度計算)')
-        print(f'覆蓋率：{(len(right_list) + len(wrong_list) + len(reask_list))/float(len(test_ans_list))}，共 {len(test_ans_list)} 題，等於 (答對題數+答錯題數+追問題數)/總題數')
+        print(f'覆蓋率：{(len(right_list) + len(wrong_list) + len(reask_list))/float(len(test_ans_list))} = {(len(right_list) + len(wrong_list) + len(reask_list))}/{len(test_ans_list)} = (答對題數+答錯題數+追問題數)/總題數')
 
         with open(os.path.join(os.path.dirname(__file__), 'right_list.txt'), 'w', encoding='utf8') as f:
             f.write('\n'.join(right_list))
@@ -133,14 +132,22 @@ class Selector:
     # 把關鍵字建分數字典，先 count 每個詞出現在幾個 end_point 裡面
     def build_keyword_count(self):
         tag_dict = self.cfg['tag']
+        # print(tag_dict['doubt'])
+        # input('sssss')
         keyword_mapping_dict = dict()
+        # for k, v in tag_dict.items():
+        #     if not isinstance(v, list):
+        #         print(v)
+        #         tag_dict[k] = list(v)
         for k, v in tag_dict.items():
             for vv in v:
                 if vv not in keyword_mapping_dict.keys():
                     keyword_mapping_dict[vv] = list()
                 keyword_mapping_dict[vv].append(k)
         for k, v in keyword_mapping_dict.items():
-            keyword_mapping_dict[k] = [1.0/len(set(v)), set(v)]
+            # keyword_mapping_dict[k] = [1.0/len(set(v)), set(v)]
+            keyword_mapping_dict[k] = [1.0, set(v)]
+        # print(keyword_mapping_dict['卡'])
         return keyword_mapping_dict
 
 
@@ -226,11 +233,17 @@ class Selector:
         keyword_score = self.keyword_mapping_dict
         # 只要處理複數個 1 的狀況就好
         if len(res) > 1 and res[0][1] >= 1:
-            # tag 多的 end_point 優先
+            # tag 多的 end_point 優先，其實可以不用排序，懶得改
             tag_count_list = sorted([(i, len(self.end_point_map_tag[i[0]])) for i in end_point_candidate], key=lambda item: item[1], reverse=True)
-            if tag_count_list[0][1] > tag_count_list[1][1]:
-                # print([tag_count_list[0][0]], '......')
-                return [tag_count_list[0][0]]
+            # prune 掉比較短的
+            pruned_candidate_list = [tag_count_list[0]]
+            for i in tag_count_list[1:]:
+                if i[1] == tag_count_list[0][1]:
+                    pruned_candidate_list.append(i)
+            # 檢查是不是同一個分機
+            pruned_candidate_set = set([i[0][0].split('_', -1)[1] for i in pruned_candidate_list])
+            if len(pruned_candidate_set) == 1:
+                return [(f'ivr_{list(pruned_candidate_set)[0]}', 1.0)]
             count = 0
             for i in sentence.strip().split(' '):
                 if i in keyword_score.keys() and len(keyword_score[i][1]) == 1:
@@ -242,6 +255,8 @@ class Selector:
             for k, v in dist_dict.items():
                 if len(v) == 1:
                     final_res[k] = len(end_point_dict[k])
+                elif len(v) == 0:
+                    final_res[k] = 10
                 else:
                     final_res[k] = (v[-1]-v[0])/float(len(v))
             try:
@@ -254,23 +269,24 @@ class Selector:
 
     def run_selector(self, sentence: str, meta: dict={}, display: bool=True):
         try:
+            print('||||||| debug ||||||||') if display else None
             log_record['nlu_start'] = time.ctime()
             s_tag = self.get_all_tag_score_in_sentence(sentence)
+            print('s_tag: ', s_tag) if display else None
             self.tag_score = s_tag
             sorted_end_point_dict = self.match_end_point(s_tag)
+            print('sorted_end_point_dict: ', sorted_end_point_dict) if display else None
+
             end_point_candidate = self.decide_which_end_point(sorted_end_point_dict)
+            print('end_point_candidate: ', end_point_candidate) if display else None
+
             res = self.refine_decision(sentence, end_point_candidate)
+            print('res:', res) if display else None
             log_record['nlu_end'] = time.ctime()
             log_record['nlu_result'] = res
             log_record['nlu_time_diff'] = (datetime.strptime(log_record['nlu_end'], "%c") - 
                                            datetime.strptime(log_record['nlu_start'], "%c")).seconds 
 
-            if display:
-                print('||||||| debug ||||||||')
-                print(s_tag)
-                print(sorted_end_point_dict)
-                print(end_point_candidate)
-                print('res:', res)
             return res
         except Exception as e:
             logging.error(e) 
@@ -331,7 +347,7 @@ class Selector:
         while True:
             if count > max_re_ask_count:
                 print('iIVR：抱歉，系統仍無法確認您的需求，將為您轉接專人，請稍候')
-            res = self.run_selector(sentence)
+            res = self.run_selector(sentence, display=True)
             msg, state, msg_to_redis = slct.response_action(res)
             if state == 'complete':
                 print(msg)
@@ -351,11 +367,6 @@ if __name__ == '__main__':
     # print("Config 檔案路徑：", args.config_path)
     # slct = Selector(args.config_path)
     slct = Selector(os.path.join(os.path.dirname(__file__), 'keyword_tag_v2.txt'))
-    '''
-    完整測試模式
-    '''
-    slct.eval_performance()
-    
     '''
     小資料測試模式
     '''
@@ -379,5 +390,11 @@ if __name__ == '__main__':
     '''
     無限問答模式
     '''
-    # while True:
-    #     slct.run_keyword_main_procedure()
+    while True:
+        slct.run_keyword_main_procedure()
+
+    '''
+    完整測試模式
+    '''
+    # slct.eval_performance()
+    
