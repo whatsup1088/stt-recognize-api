@@ -9,7 +9,6 @@ import os
 import time
 from threading import Thread
 from urllib.parse import parse_qs, urlparse
-import uuid
 
 import redis
 from vosk import KaldiRecognizer, Model
@@ -60,6 +59,7 @@ async def recognize(websocket, path):
 
     msg_time_list = []
     log_record = {}
+    audio_no = 0
 
     rec = None
     sample_rate = 16000
@@ -88,6 +88,7 @@ async def recognize(websocket, path):
             
             if res.get("text", False):
                 recognize_end_time = time.time()
+                audio_no += 1
                 log_record['recognize_end'] = time.ctime(recognize_end_time)
                 log_record['sentence_start'] = time.ctime(msg_time_list[0])
                 log_record['sentence_end'] = time.ctime(msg_time_list[-1])
@@ -95,7 +96,7 @@ async def recognize(websocket, path):
                 log_record['recognize_time_duration'] = recognize_end_time - msg_time_list[-1]         
                 log_record['stt_result'] = res.get("text")
                 log_record['audio_file_id'] = '{}_{}_{}'.format(time.strftime("%Y-%m-%d", time.gmtime()), 
-                                                                request_id, str(uuid.uuid1()))
+                                                                request_id, str(audio_no))
                 logging.info(log_record)
                 msg_time_list = []
                 
