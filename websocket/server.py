@@ -37,7 +37,7 @@ def save_to_redis(r, request_id, nlu_rslt):
 
 def send_hc_to_redis(r, port):
     while 1:
-        r.publish(port, 'alive')
+        r.publish(port, 1) # 1: alive
         time.sleep(0.2)
 
 
@@ -96,7 +96,7 @@ async def recognize(websocket, path):
                 log_record['recognize_time_duration'] = recognize_end_time - msg_time_list[-1]         
                 log_record['stt_result'] = res.get("text")
                 log_record['audio_file_id'] = '{}_{}_{}'.format(time.strftime("%Y-%m-%d", time.gmtime()), 
-                                                                request_id, str(audio_no))
+                                                                request_id, str(audio_no).rjust(3,'0'))
                 logging.info(log_record)
                 msg_time_list = []
                 
