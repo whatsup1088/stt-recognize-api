@@ -2,17 +2,21 @@
 # -*- coding: UTF-8 -*-
 
 import argparse
+import ast
 import copy
+from collections import Counter
 from datetime import datetime
 import logging
 import operator
 import os
 import time
-from collections import Counter
 
 from configobj import ConfigObj
 import jieba
+import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
 
 # from if_stt.code.text_processing.tokenizer import Tokenizer
 # 先不斷詞，因為 stt 結果為已斷過詞
@@ -111,11 +115,19 @@ class Selector:
         self.make_confusion_matrix(right_list, wrong_list, reask_list, legacy_ivr_list)
 
     def make_confusion_matrix(self, right_list: list, wrong_list: list, reask_list: list, legacy_ivr_list: list):
-        # 這邊實作更詳細的 report，分析 wrong_list，先統計各 ivr 分錯的，這邊交給思婕完成
+        # 這邊實作更詳細的 report，分析 wrong_list，先統計各 ivr 分錯的
         # to-do 畫出 confusion matrix
         # 每個 list 裡面的元素長這樣 ['消費 限額', '111', "[('ivr_1121_5', 0.6666666666666666)]"]
-        # 基本上就是 log 內容
-        # 輸出成圖檔就好？
+        y_true = [ x[1] for x in right_list ] + [ x[1] for x in wrong_list ] + [ x[1] for x in reask_list ] + [ x[1] for x in legacy_ivr_list ]
+        y_pred = [ ast.literal_eval(x[2])[0][0].split('_')[1] for x in right_list ] +[ ast.literal_eval(x[2])[0][0].split('_')[1] for x in wrong_list ] +[ ast.literal_eval(x[2])[0][0].split('_')[1] for x in reask_list ] +[ ast.literal_eval(x[2])[0][0].split('_')[1] for x in legacy_ivr_list ]
+
+        labels = list(set(y_true))
+        cf_matrix = confusion_matrix(y_true, y_pred, labels=labels)
+
+        plt.figure(figsize=(16, 16))
+        sns.heatmap(cf_matrix, annot=True, xticklabels=labels, yticklabels=labels)
+        plt.savefig("cf_matrix.png")
+        plt.show()
         pass
 
     def load_pkl(self):
