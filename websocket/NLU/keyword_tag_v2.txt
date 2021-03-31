@@ -83,7 +83,10 @@ ivr_114_1_5 = 補寄信用卡電子帳單, credit_card, email, send
 ivr_114_1_6 = 補寄信用卡電子帳單, credit_card, electric, bill, send
 ivr_114_1_7 = 補寄信用卡電子帳單, electric, bill
 
-ivr_114_2_1 = 補寄信用卡簡訊帳單, credit_card, sms, bill
+ivr_114_2_1 = 補寄信用卡簡訊帳單, credit_card, sms, bill, send
+ivr_114_2_2 = 補寄信用卡簡訊帳單, credit_card, mobile, bill, send
+ivr_114_2_3 = 補寄信用卡簡訊帳單, credit_card, sms, bill
+ivr_114_2_4 = 補寄信用卡簡訊帳單, credit_card, mobile, bill
 
 ivr_117 = 傳真信用卡帳單, credit_card, fax, transaction, send
 ivr_116 = 使用本行帳戶繳信用卡費, credit_card, esun, pay, transaction
@@ -204,6 +207,7 @@ least = 最後, 最晚
 loan = 貸款, 信貸, 房貸, 貸
 loss = 遺失, lost, loss, 掉了, 丟了, 不見, 不見了, 找不到, 掛失, 沒收到, 未收到
 makeup = 補, 補繳, 補票, 補發
+mobile = 行動,
 method = 方法, 方式
 min = 最少, 最低, 至少
 money = 金額, 多少, 多少錢, 錢, 資金
@@ -218,6 +222,7 @@ parking = 停車場, 嘟嘟房
 password = 密碼, password, 密
 pay = 繳, 繳款, 付款, 繳錢, 交錢, 交, 繳交, 費用, 繳清, 自動扣繳, 扣繳, 多少, 扣款, 扣, 應繳, 欠, 繳費, 結清, 繳納
 period = 定存, 定期, 定期存款
+paper = 紙本,
 pickup = 接送, 預約
 post = 郵政, 劃撥, 郵政劃撥, 郵局
 query = 查詢,

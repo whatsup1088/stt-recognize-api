@@ -154,8 +154,8 @@ class Selector:
                     keyword_mapping_dict[vv] = list()
                 keyword_mapping_dict[vv].append(k)
         for k, v in keyword_mapping_dict.items():
-            # keyword_mapping_dict[k] = [1.0/len(set(v)), set(v)]
-            keyword_mapping_dict[k] = [1.0, set(v)]
+            keyword_mapping_dict[k] = [1.0/len(set(v)), set(v)]
+            # keyword_mapping_dict[k] = [1.0, set(v)]
         # print(keyword_mapping_dict['卡'])
         return keyword_mapping_dict
 
