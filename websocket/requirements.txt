@@ -1,6 +1,9 @@
-websockets
-vosk
-redis
 configobj
 jieba
+matplotlib
 pandas
+redis
+seaborn
+sklearn
+vosk
+websockets
