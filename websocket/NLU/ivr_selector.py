@@ -112,7 +112,7 @@ class Selector:
         with open(os.path.join(os.path.dirname(__file__), 'legacy_ivr_list.txt'), 'w', encoding='utf8') as f:
             f.write('\n'.join([','.join(i) for i in legacy_ivr_list]))
 
-        self.make_confusion_matrix(right_list, wrong_list, reask_list, legacy_ivr_list)
+        # self.make_confusion_matrix(right_list, wrong_list, reask_list, legacy_ivr_list)
 
     def make_confusion_matrix(self, right_list: list, wrong_list: list, reask_list: list, legacy_ivr_list: list):
         # 這邊實作更詳細的 report，分析 wrong_list，先統計各 ivr 分錯的
@@ -125,8 +125,8 @@ class Selector:
 
         plt.figure(figsize=(16, 16))
         sns.heatmap(cf_matrix, annot=True, fmt='g', xticklabels=labels, yticklabels=labels)
-        plt.xlabel("y pred")
-        plt.ylabel("y true") 
+        plt.xlabel("keyword-based iIVR inference")
+        plt.ylabel("IVR ground truth") 
         plt.savefig("cf_matrix.png")
         plt.show()
         pass
