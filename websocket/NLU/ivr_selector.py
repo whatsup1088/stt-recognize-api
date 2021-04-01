@@ -126,6 +126,8 @@ class Selector:
 
         plt.figure(figsize=(16, 16))
         sns.heatmap(cf_matrix, annot=True, xticklabels=labels, yticklabels=labels)
+        plt.xlabel("y pred")
+        plt.ylabel("y true") 
         plt.savefig("cf_matrix.png")
         plt.show()
         pass
