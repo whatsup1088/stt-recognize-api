@@ -118,9 +118,8 @@ class Selector:
         # 這邊實作更詳細的 report，分析 wrong_list，先統計各 ivr 分錯的
         # to-do 畫出 confusion matrix
         # 每個 list 裡面的元素長這樣 ['消費 限額', '111', "[('ivr_1121_5', 0.6666666666666666)]"]
-        y_true = [ x[1] for x in right_list ] + [ x[1] for x in wrong_list ] + [ x[1] for x in reask_list ] + [ x[1] for x in legacy_ivr_list ]
-        y_pred = [ ast.literal_eval(x[2])[0][0].split('_')[1] for x in right_list ] +[ ast.literal_eval(x[2])[0][0].split('_')[1] for x in wrong_list ] +[ ast.literal_eval(x[2])[0][0].split('_')[1] for x in reask_list ] +[ ast.literal_eval(x[2])[0][0].split('_')[1] for x in legacy_ivr_list ]
-
+        y_true = [ x[1] for x in right_list ] + [ x[1] for x in wrong_list ] + [ x[1] for x in legacy_ivr_list ]
+        y_pred = [ ast.literal_eval(x[2])[0][0].split('_')[1] for x in right_list ] +[ ast.literal_eval(x[2])[0][0].split('_')[1] for x in wrong_list ] +[ ast.literal_eval(x[2])[0][0].split('_')[1] for x in legacy_ivr_list ]
         labels = list(set(y_true))
         cf_matrix = confusion_matrix(y_true, y_pred, labels=labels)
 
