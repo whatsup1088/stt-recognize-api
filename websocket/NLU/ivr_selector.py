@@ -237,7 +237,7 @@ class Selector:
     def run_selector(self, sentence: str, meta: dict={}, display: bool=True):
         try:
             nlu_start_time = time.time()
-            log_record['nlu_start'] = time.ctime(nlu_start_time)
+            log_record['nlu_start'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(nlu_start_time))
 
             s_tag = self.get_all_tag_score_in_sentence(sentence)
             self.tag_score = s_tag
@@ -246,7 +246,7 @@ class Selector:
             res = self.refine_decision(sentence, end_point_candidate)
 
             nlu_end_time = time.time()
-            log_record['nlu_end'] = time.ctime(nlu_end_time)
+            log_record['nlu_end'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(nlu_end_time))
             log_record['nlu_result'] = res
             log_record['nlu_time_duration'] = nlu_end_time - nlu_start_time
 

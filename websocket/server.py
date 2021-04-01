@@ -89,9 +89,9 @@ async def recognize(websocket, path):
             if res.get("text", False):
                 recognize_end_time = time.time()
                 audio_no += 1
-                log_record['recognize_end'] = time.ctime(recognize_end_time)
-                log_record['sentence_start'] = time.ctime(msg_time_list[0])
-                log_record['sentence_end'] = time.ctime(msg_time_list[-1])
+                log_record['recognize_end'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(recognize_end_time))
+                log_record['sentence_start'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(msg_time_list[0]))
+                log_record['sentence_end'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(msg_time_list[-1]))
                 log_record['sentence_time_duration'] = msg_time_list[-1] - msg_time_list[0]
                 log_record['recognize_time_duration'] = recognize_end_time - msg_time_list[-1]         
                 log_record['stt_result'] = res.get("text")
