@@ -376,7 +376,7 @@ class Selector:
                 tmp = " ".join(sentence_list[:count+1])
                 print(f'系統判斷此句 --> {tmp} >>>>> state：{state}')
                 res = self.run_selector(tmp, display=False)
-                msg, state, msg_to_redis = slct.response_action(res)
+                msg, state, msg_to_redis = self.response_action(res)
                 if state == 'complete':
                     break
             if state == 'complete':
