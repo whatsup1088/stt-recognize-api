@@ -352,10 +352,17 @@ class Selector:
             msg_to_redis = f'F_-1'
             state = 'unknown'
         else:
-            if end_point_list[0][0] in end_point_content.keys():
-                msg_to_user = f'立刻為您導航至 {end_point_content[end_point_list[0][0]]}'
+            ivr_item = end_point_list[0][0].split('_')[1]
+            if ivr_item not in ['111', '113', '132', '14']:
+            # if end_point_list[0][0] in end_point_content.keys():
+                for i in end_point_content.keys():
+                    tmp = f'ivr_{ivr_item}'
+                    if tmp in i:
+                        tmp = i
+                        break
+                msg_to_user = f'立刻為您導航至 {ivr_item}: {end_point_content[tmp]}'
             else:
-                msg_to_user = f'立刻為您導航至 {end_point_list[0][0]} (滿足多重子項目)'
+                msg_to_user = f'立刻為您導航至 {ivr_item} (多重子項目敘述不同)'
             msg_to_redis = 'E_{}'.format(end_point_list[0][0].split('_')[1])
             state = 'complete'
         return msg_to_user, state, msg_to_redis
@@ -369,7 +376,7 @@ class Selector:
         sentence_cut = list(jieba.cut(sentence.lower(), HMM=False))
         sentence_list = [" ".join(sentence_cut)]
         while True:
-            if count > max_re_ask_count:
+            if count >= max_re_ask_count:
                 print('iIVR：抱歉，系統仍無法確認您的需求，將為您轉接銀行業務專人，請稍候')
                 break
             for i in range(count+1):
@@ -427,11 +434,11 @@ if __name__ == '__main__':
     '''
     無限問答模式
     '''
-    # while True:
-    #     slct.run_keyword_main_procedure()
+    while True:
+        slct.run_keyword_main_procedure()
 
     '''
     完整測試模式
     '''
-    slct.eval_performance()
+    # slct.eval_performance()
     
