@@ -38,10 +38,10 @@ class Selector:
 
     def eval_performance(self):
         # tok = Tokenizer('lm_config.ini')
-        jieba_main_dict_path = os.path.join(os.path.dirname(__file__), 'jieba.5.txt')
-        jieba_user_dict_path = os.path.join(os.path.dirname(__file__), '__UserDict.txt')
-        jieba.set_dictionary(jieba_main_dict_path)
-        jieba.load_userdict(jieba_user_dict_path)
+        # jieba_main_dict_path = os.path.join(os.path.dirname(__file__), 'jieba.5.txt')
+        # jieba_user_dict_path = os.path.join(os.path.dirname(__file__), '__UserDict.txt')
+        # jieba.set_dictionary(jieba_main_dict_path)
+        # jieba.load_userdict(jieba_user_dict_path)
 
         testing_data = self.load_pkl()
 
@@ -366,11 +366,19 @@ class Selector:
         state = 'start'
         count = 0
         sentence = input('=====================\n==== new session ====\n=====================\niIVR：玉山銀行您好，請問有什麼能為您服務呢？\n顧客：')
+        sentence_cut = list(jieba.cut(sentence.lower(), HMM=False))
+        sentence_list = [" ".join(sentence_cut)]
         while True:
             if count > max_re_ask_count:
-                print('iIVR：抱歉，系統仍無法確認您的需求，將為您轉接專人，請稍候')
-            res = self.run_selector(sentence, display=True)
-            msg, state, msg_to_redis = slct.response_action(res)
+                print('iIVR：抱歉，系統仍無法確認您的需求，將為您轉接銀行業務專人，請稍候')
+                break
+            for i in range(count+1):
+                tmp = " ".join(sentence_list[:count+1])
+                print(f'系統判斷此句 --> {tmp} >>>>> state：{state}')
+                res = self.run_selector(tmp, display=False)
+                msg, state, msg_to_redis = slct.response_action(res)
+                if state == 'complete':
+                    break
             if state == 'complete':
                 print(msg)
                 break
@@ -379,6 +387,8 @@ class Selector:
                 break
             else:
                 sentence = input(msg)
+                sentence_cut = list(jieba.cut(sentence.lower(), HMM=False))
+                sentence_list.append(" ".join(sentence_cut))
             count += 1
             
 
@@ -388,6 +398,11 @@ if __name__ == '__main__':
     # args = parser.parse_args()
     # print("Config 檔案路徑：", args.config_path)
     # slct = Selector(args.config_path)
+    jieba_main_dict_path = os.path.join(os.path.dirname(__file__), 'jieba.5.txt')
+    jieba_user_dict_path = os.path.join(os.path.dirname(__file__), '__UserDict.txt')
+    jieba.set_dictionary(jieba_main_dict_path)
+    jieba.load_userdict(jieba_user_dict_path)
+
     slct = Selector(os.path.join(os.path.dirname(__file__), 'keyword_tag_v2.txt'))
     '''
     小資料測試模式
