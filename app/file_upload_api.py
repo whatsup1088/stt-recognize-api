@@ -22,9 +22,10 @@ async def upload_wav_api(
 ):
     # 設定參數
     queue_name = router._cfg['upload']['queue_name']
-    storage_dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), router._cfg['upload']['storage'])
+    storage_dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), router._cfg['upload']['wav_storage_path'])
     # 初始化
     response = dict()
+    # 正式流程開始
     for upload_file in upload_files:
         mime_type, media_type = upload_file.content_type.split("/")
         if "audio" != mime_type:
@@ -32,6 +33,7 @@ async def upload_wav_api(
                 error=True,
                 error_msg=f"type '{mime_type}' not supported",
             )
+            # log error: not support <mime_type>
             continue
 
         uniqid = str(uuid.uuid1())
@@ -45,7 +47,12 @@ async def upload_wav_api(
                 Path(save_path),
             )
         # 寫 redis
-        router._redis.rpush(queue_name, save_path)
+        try:
+            router._redis.rpush(queue_name, save_path)
+        except Exception as e:
+            # log error: communication error with redis
+            raise
 
         response[uniqid] = upload_file.filename
+        # log <filename> <uuid>
     return response
