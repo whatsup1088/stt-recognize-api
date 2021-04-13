@@ -7,5 +7,5 @@ import file_upload_api
 router = APIRouter()
 
 router.include_router(docs.router)
-router.include_router(stt.router)
+# router.include_router(stt.router)
 router.include_router(file_upload_api.router)
