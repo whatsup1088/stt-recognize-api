@@ -2,7 +2,7 @@ import uuid
 from typing import List
 from fastapi import APIRouter, BackgroundTasks, File, UploadFile
 from misc import save_upload_file
-import redis
+# import redis
 from pathlib import Path
 from configobj import ConfigObj
 import os
@@ -12,7 +12,7 @@ router = APIRouter()
 @router.on_event("startup")
 async def starup_event():
     router._cfg = ConfigObj('./config.ini')
-    router._redis = redis.Redis(host='localhost', port=6379, password='')
+    # router._redis = redis.Redis(host='localhost', port=6379, password='')
 
 @router.post("/stt/upload_wav")
 async def upload_wav_api(
@@ -21,7 +21,7 @@ async def upload_wav_api(
     save_file: bool = True,
 ):
     # 設定參數
-    queue_name = router._cfg['upload']['queue_name']
+    # queue_name = router._cfg['upload']['queue_name']
     storage_dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), router._cfg['upload']['wav_storage_path'])
     # 初始化
     response = dict()
@@ -46,13 +46,6 @@ async def upload_wav_api(
                 upload_file,
                 Path(save_path),
             )
-        # 寫 redis
-        try:
-            router._redis.rpush(queue_name, save_path)
-        except Exception as e:
-            # log error: communication error with redis
-            raise
-
         response[uniqid] = upload_file.filename
         # log <filename> <uuid>
     return response
