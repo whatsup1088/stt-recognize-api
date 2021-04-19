@@ -1,10 +1,10 @@
 # spaceman defines
 websocket/NLU/*list.txt
 app/data/*
-app/recognized_data/*
-app/log/*
-app/stt_result/*
-app/metadata/*
+# app/recognized_data/*
+# app/log/*
+# app/stt_result/*
+# app/metadata/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
