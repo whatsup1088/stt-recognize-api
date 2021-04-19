@@ -11,7 +11,7 @@ from utils import UtcTime
 import json
 from datetime import timezone
 
-def recognize_from_redis():
+def recognize_pooling_srv():
     # 導入設定
     cfg = ConfigObj(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'offline_stt_api_config.ini'))
     model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), cfg['stt']['model_path'])
@@ -63,4 +63,4 @@ def recognize_from_redis():
             os.rename(i, os.path.join(wav_path_after_stt, i.rsplit("/", 1)[-1]))
 
 if __name__ == '__main__':
-    recognize_from_redis()
+    recognize_pooling_srv()
