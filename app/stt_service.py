@@ -1,6 +1,6 @@
-from fastapi import BackgroundTasks
+# from fastapi import BackgroundTasks
 import os
-import redis
+# import redis
 from libs.recognizer import Recognizer
 import time
 from models.Recognition import RecognitionModel
