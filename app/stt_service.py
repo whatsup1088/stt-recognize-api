@@ -44,15 +44,6 @@ def recognize_from_redis():
                 metadata = json.load(f)
             # 寫結果，metadata 部份塞進來
             sentence.update(metadata)
-            # sentence['id'] = metadata['id']
-            # sentence['project'] = metadata['project']
-            # sentence['source_unit'] = metadata['source_unit']
-            # sentence['c_p_num'] = metadata['c_p_num']
-            # sentence['c_id'] = metadata['c_id']
-            # sentence['a_p_num'] = metadata['a_p_num']
-            # sentence['a_id'] = metadata['a_id']
-            # sentence['port_id'] = metadata['port_id']
-            # sentence['call_in_time'] = metadata['call_in_time']
             # 寫結果，辨識結果部份
             sentence['key'] = log_name
             sentence['recog_start_time'] = t_start
