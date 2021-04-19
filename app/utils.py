@@ -2,7 +2,18 @@
 # -*- coding: UTF-8 -*-
 import re
 import os
+from datetime import timezone
+import datetime
 
+class UtcTime:
+    def __init__(self):
+        pass
+    @staticmethod
+    def get_current_utc_time():
+        dt = datetime.datetime.now(timezone.utc)
+        utc_time = dt.replace(tzinfo=timezone.utc)
+        utc_timestamp = utc_time.timestamp()  
+        return utc_timestamp
 
 class FileManager:
 
