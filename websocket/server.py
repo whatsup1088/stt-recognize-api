@@ -10,7 +10,9 @@ from vosk import KaldiRecognizer, Model
 
 vosk_interface = "0.0.0.0"
 vosk_port = 2700
-vosk_model_path = "model/esun"
+vosk_model_path = (
+    "speech_model/esun"  # "esun-model-idiom"  # "model_8k"  # "model/esun"
+)
 
 model = Model(vosk_model_path)
 pool = concurrent.futures.ThreadPoolExecutor((os.cpu_count() or 1))
@@ -18,11 +20,14 @@ loop = asyncio.get_event_loop()
 
 
 def process_chunk(rec, message):
-    if message == '{"eof" : 1}':
+
+    if message == '{"eof":1}':
         return rec.FinalResult(), True
     elif rec.AcceptWaveform(message):
+        print("====result====")
         return rec.Result(), False
 
+    print("====part result====")
     return rec.PartialResult(), False
 
 
@@ -35,6 +40,9 @@ async def recognize(websocket, path):
     while True:
 
         message = await websocket.recv()
+        print("=" * 8)
+        print(message)
+        print("=" * 8)
 
         if not rec:
             rec = KaldiRecognizer(model, sample_rate)

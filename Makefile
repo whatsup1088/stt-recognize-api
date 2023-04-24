@@ -3,7 +3,7 @@ IMAGE_NAME=fastapi
 CONTAINER_NAME=fastapi
 
 serve:
-	gunicorn -k uvicorn.workers.UvicornWorker main:app
+	cd app;gunicorn -k uvicorn.workers.UvicornWorker main:app
 
 build:
 	docker build -t $(IMAGE_NAME) .
